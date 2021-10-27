@@ -76,7 +76,7 @@ const Cart = () => {
     return (
         <View style={styles.container}>
             {vtotal && JSON.parse(total).map((item,i)=>(
-                <Text h1 style={{marginHorizontal:10}} key={i}>Total Rp {item.total}</Text>
+                <Text h4 style={{marginHorizontal:10}} key={i}>Total Rp {item.total}</Text>
             ))}
             <ScrollView>
                 {load && JSON.parse(barang).map((item,i)=>(

@@ -13,6 +13,8 @@ const Home = () => {
     const [id, setId] = useState(0)
     const [sudah, setSudah] = useState(false)
     const [load, setLoad] = useState(false)
+    const [vtotal, setVtotal] = useState(false)
+    const [total, setTotal] = useState([])
 
     const filtered = (all) => {
         return all.nama.toUpperCase().indexOf(search.toUpperCase()) > -1
@@ -92,8 +94,29 @@ const Home = () => {
         })
     }
 
+    const jumlah = async() => {
+        db.transaction(tx=>{
+            tx.executeSql(
+                `SELECT (SUM(harga)) AS total FROM barang WHERE ambil = 0`,
+                [],
+                async(req, res)=> {
+                    if(res.rows.length > 0){
+                        setTotal(JSON.stringify(res.rows._array))
+                        setVtotal(true)
+                    }else{
+                        setVtotal(false)
+                    }
+                },
+                error=>{
+                    console.log(error.message);
+                }
+            )
+        })
+    }
+
     useEffect(()=>{
         getData();
+        jumlah();
     },[])
 
     const [open,setOpen] = useState(false)
@@ -101,13 +124,17 @@ const Home = () => {
     return (
         <View style={styles.container}>
             <Input
-            containerStyle={{backgroundColor:'#fff9', marginVertical:10, height:60, borderRadius:5}}
-            rightIcon={<Icon name="closecircleo" type="antdesign" onPress={()=>setSearch('')}/>}
-            placeholder="Search.."
-            value={search}
-            onChangeText={(e)=>{
+                containerStyle={{backgroundColor:'#fff9', marginVertical:10, height:60, borderRadius:5}}
+                rightIcon={<Icon name="closecircleo" type="antdesign" onPress={()=>setSearch('')}/>}
+                placeholder="Search.."
+                value={search}
+                onChangeText={(e)=>{
                 setSearch(e)
             }}/>
+
+            {vtotal && JSON.parse(total).map((item,i)=>(
+                <Text h4 style={{marginHorizontal:10}} key={i}>Total Rp {item.total}</Text>
+            ))}
 
             <Button
             type="solid"
@@ -152,7 +179,10 @@ const Home = () => {
             }}>
                 <Text h4>Ambil??</Text>
                 <View style={{flexDirection:'row', justifyContent:'space-around'}}>
-                    <Button type="clear" title="YES" onPress={ambilBarang}/>
+                    <Button type="clear" title="YES" onPress={()=>{
+                        ambilBarang();
+                        jumlah();
+                    }}/>
                     <Button type="clear" title="NO" onPress={()=>{
                         setSudah(false)
                         setId(0)
