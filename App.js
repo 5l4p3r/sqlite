@@ -63,13 +63,13 @@ const styles = StyleSheet.create({
   container:{
     flex:1,
     paddingTop:25,
-    backgroundColor:'#c3ebd9'
+    backgroundColor:'#c3ebd9',
   },
   nav: {
     flexDirection:'row',
     justifyContent:'space-around',
     backgroundColor:'orange',
-    height: 40,
+    height: 50,
     alignItems:'center',
     position:'relative',
   },

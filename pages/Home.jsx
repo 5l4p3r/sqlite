@@ -1,8 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, View} from 'react-native'
 import { Button, Icon, Input, ListItem, Overlay, Text} from 'react-native-elements'
-// import AsyncStorage from '@react-native-async-storage/async-storage'
-import PTRView from 'react-native-pull-to-refresh'
 import { UseContext } from '../hooks/UseContext'
 
 const Home = () => {
@@ -15,26 +13,60 @@ const Home = () => {
     const [load, setLoad] = useState(false)
     const [vtotal, setVtotal] = useState(false)
     const [total, setTotal] = useState([])
+    const [edit, setEdit] = useState(false)
 
     const filtered = (all) => {
         return all.nama.toUpperCase().indexOf(search.toUpperCase()) > -1
     }
 
+    const clearForm = () => {
+        setId(0);
+        setNama('');
+        setHarga('');
+    }
+
     const createCart = () => {
-        db.transaction(txn => {
-            txn.executeSql(
-                `INSERT INTO barang (id,nama,harga,ambil) VALUES (?,?,?,?)`,
-                [null,nama,harga,0],
-                (txn,res)=>{
-                    setNama('')
-                    setHarga(0)
-                    setOpen(false)
-                },
-                error => {
-                    console.log('GAGAL ' + error.message, nama, harga);
-                }
-            )
-        })
+        if(nama === '' || harga === ''){
+            alert('Form is empty')
+        }else{
+            db.transaction(txn => {
+                txn.executeSql(
+                    `INSERT INTO barang (id,nama,harga,ambil) VALUES (?,?,?,?)`,
+                    [null,nama,harga,0],
+                    (txn,res)=>{
+                        setNama('')
+                        setHarga(0)
+                        setOpen(false)
+                    },
+                    error => {
+                        console.log('GAGAL ' + error.message, nama, harga);
+                    }
+                )
+            })
+        }
+    }
+
+    const editCart = () => {
+        if(nama === '' || harga === ''){
+            alert('Form is empty')
+        }else{
+            db.transaction(tx=>{
+                tx.executeSql(
+                    `UPDATE barang SET nama = ?, harga = ? WHERE id = ?`,
+                    [nama,harga,id],
+                    (res) => {
+                        console.log('Berhasil Update ' + res);
+                        setEdit(false);
+                        clearForm();
+                        getData();
+                        jumlah();
+                    },
+                    error => {
+                        console.log('Gagal Update karena ' + error.message);
+                    }
+                )
+            })
+        }
     }
 
     const getData = async() => {
@@ -55,25 +87,6 @@ const Home = () => {
                 }
             )
         })
-    }
-
-    const setCookies = async() => {
-        try {
-            await AsyncStorage.setItem('@barang', JSON.stringify(barang))
-        } catch (error) {
-            console.log(error.message);
-        }
-    }
-
-    const getCookies = async() => {
-        try {
-            const getBarang = await AsyncStorage.getItem('@barang')
-            if(getBarang !== null){
-                setBarang(getBarang)
-            }
-        } catch (error) {
-            console.log(error.message);
-        }
     }
 
     const ambilBarang = () => {
@@ -124,7 +137,7 @@ const Home = () => {
     return (
         <View style={styles.container}>
             <Input
-                containerStyle={{backgroundColor:'#fff9', marginVertical:10, height:60, borderRadius:5}}
+                containerStyle={{backgroundColor:'#fff9', marginVertical:10, height:60, borderRadius:5,borderWidth:1, borderColor:'orange'}}
                 rightIcon={<Icon name="closecircleo" type="antdesign" onPress={()=>setSearch('')}/>}
                 placeholder="Search.."
                 value={search}
@@ -144,21 +157,53 @@ const Home = () => {
                 <Icon name="shoppingcart" type="antdesign" color="#fff" size={20}/>
             }/>
 
+            {/* ADD */}
             <Overlay isVisible={open}
             onBackdropPress={()=>{
                 setOpen(false)
             }}>
                 <Text h4>Create Cart</Text>
-                <Input placeholder="Name" containerStyle={{ width:300 }} onChangeText={(e)=>setNama(e)}/>
-                <Input keyboardType='numeric' placeholder="Price" containerStyle={{ width:300 }} onChangeText={(e)=>setHarga(e)}/>
+                <Text>Nama</Text>
+                <Input placeholder="Name" 
+                    containerStyle={{ width:300 }} 
+                    onChangeText={(e)=>setNama(e)}/>
+                <Text>Harga</Text>
+                <Input keyboardType='numeric'
+                    placeholder="Estimate Price" 
+                    containerStyle={{ width:300 }} 
+                    onChangeText={(e)=>setHarga(e)}/>
                 <Button type="solid" buttonStyle={{backgroundColor:'orange'}} icon={<Icon name="addfile" type="antdesign" color="#fff"/>} onPress={()=>{
                     createCart();
                     getData();
+                    jumlah();
                 }}/>
+            </Overlay>
+            {/* EDIT */}
+            <Overlay isVisible={edit} onBackdropPress={()=>{
+                setEdit(false);
+                clearForm();
+            }}>
+                <Text h4>Edit</Text>
+                <Text>Nama</Text>
+                <Input placeholder="Name"
+                    value={nama}
+                    containerStyle={{ width:300 }} 
+                    onChangeText={(e)=>setNama(e)}/>
+                <Text>Harga</Text>
+                <Input keyboardType='numeric'
+                    value={harga.toString()}
+                    placeholder="Estimate Price" 
+                    containerStyle={{ width:300 }} 
+                    onChangeText={(e)=>setHarga(e)}/>
+                <Button type="solid"
+                    onPress={editCart}
+                    buttonStyle={{backgroundColor:'orange'}}
+                    icon={<Icon type="MaterialCommunityIcons" name="update"/>} />
             </Overlay>
             <ScrollView>
                 {load && JSON.parse(barang).filter(filtered).map((item,i)=>(
-                    <ListItem key={i}>
+                    <ListItem key={i}
+                        containerStyle={{borderRadius:5,marginVertical:5,borderWidth:1, borderColor:'orange'}}>
                         <Text>{i+1}</Text>
                         <ListItem.Content>
                             <ListItem.Title>{item.nama}</ListItem.Title>
@@ -170,6 +215,14 @@ const Home = () => {
                                 setSudah(true);
                                 setId(item.id);
                             }}/>
+                        <Button type="clear"
+                            onPress={()=>{
+                                setEdit(true);
+                                setNama(item.nama);
+                                setHarga(item.harga);
+                                setId(item.id);
+                            }}
+                            icon={<Icon type="FontAwesome" name="edit"/>}/>
                     </ListItem>
                 ))}
             </ScrollView>
@@ -177,7 +230,7 @@ const Home = () => {
                 setSudah(false)
                 setId(0)
             }}>
-                <Text h4>Ambil??</Text>
+                <Text h4 style={{width:300,marginBottom:10,textAlign:'center'}}>Sudah ambil?</Text>
                 <View style={{flexDirection:'row', justifyContent:'space-around'}}>
                     <Button type="clear" title="YES" onPress={()=>{
                         ambilBarang();

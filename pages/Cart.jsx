@@ -80,7 +80,12 @@ const Cart = () => {
             ))}
             <ScrollView>
                 {load && JSON.parse(barang).map((item,i)=>(
-                    <ListItem key={i}>
+                    <ListItem key={i} 
+                        containerStyle={{
+                            borderRadius:5,
+                            marginVertical:5,
+                            borderWidth:1,
+                            borderColor:'orange'}}>
                         <Text>{i+1}</Text>
                         <ListItem.Content>
                             <ListItem.Title>{item.nama}</ListItem.Title>
@@ -119,5 +124,6 @@ export default Cart
 const styles = StyleSheet.create({
     container: {
         flex:1,
+        paddingHorizontal:10
     }
 })
