@@ -22,7 +22,7 @@ const App = () => {
           ambil INTEGER(1) DEFAULT(0))`,
         [],
         (req,res) => {
-          console.log('table created');
+          // console.log('table created');
         },
         error => {
           console.log('error create' + error.message);
@@ -32,7 +32,7 @@ const App = () => {
   }
 
   useEffect(async()=>{
-    await createTable()
+    await createTable();
   },[])
   return (
     <UseContext.Provider value={{
@@ -63,6 +63,7 @@ const styles = StyleSheet.create({
   container:{
     flex:1,
     paddingTop:25,
+    backgroundColor:'#c3ebd9'
   },
   nav: {
     flexDirection:'row',
