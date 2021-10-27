@@ -7,6 +7,8 @@ const Cart = () => {
     const {db} = useContext(UseContext)
     const [barang, setBarang] = useState([])
     const [load, setLoad] = useState(false)
+    const [vtotal, setVtotal] = useState(false)
+    const [total, setTotal] = useState([])
     const [del, setDel] = useState(false)
     const [id, setId] = useState(0)
 
@@ -47,12 +49,35 @@ const Cart = () => {
         })
     }
 
+    const jumlah = async() => {
+        db.transaction(tx=>{
+            tx.executeSql(
+                `SELECT (SUM(harga)) AS total FROM barang WHERE ambil = 1`,
+                [],
+                async(req, res)=> {
+                    if(res.rows.length > 0){
+                        setTotal(JSON.stringify(res.rows._array))
+                        setVtotal(true)
+                    }else{
+                        setVtotal(false)
+                    }
+                },
+                error=>{
+                    console.log(error.message);
+                }
+            )
+        })
+    }
+
     useEffect(()=>{
-        getData()
+        getData();
+        jumlah();
     },[])
     return (
         <View style={styles.container}>
-            <Text h1 style={{marginHorizontal:10}}>Total Rp</Text>
+            {vtotal && JSON.parse(total).map((item,i)=>(
+                <Text h1 style={{marginHorizontal:10}} key={i}>Total Rp {item.total}</Text>
+            ))}
             <ScrollView>
                 {load && JSON.parse(barang).map((item,i)=>(
                     <ListItem key={i}>
@@ -80,6 +105,7 @@ const Cart = () => {
                     <Button title="Yes" type="clear" onPress={()=>{
                         hapus();
                         getData();
+                        jumlah();
                     }}/>
                     <Button title="No" type="clear" onPress={()=>setDel(false)}/>
                 </View>

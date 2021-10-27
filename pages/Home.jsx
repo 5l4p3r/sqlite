@@ -101,7 +101,7 @@ const Home = () => {
     return (
         <View style={styles.container}>
             <Input
-            containerStyle={{backgroundColor:'#fff7', marginVertical:10, height:60, borderRadius:5}}
+            containerStyle={{backgroundColor:'#fff9', marginVertical:10, height:60, borderRadius:5}}
             rightIcon={<Icon name="closecircleo" type="antdesign" onPress={()=>setSearch('')}/>}
             placeholder="Search.."
             value={search}
