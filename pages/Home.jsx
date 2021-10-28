@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, View} from 'react-native'
-import { Button, FAB, Icon, Input, ListItem, Overlay, Text} from 'react-native-elements'
+import { Button, FAB, Icon, Input, ListItem, Overlay, SearchBar, Text} from 'react-native-elements'
 import { UseContext } from '../hooks/UseContext'
 
 const Home = () => {
@@ -14,6 +14,7 @@ const Home = () => {
     const [vtotal, setVtotal] = useState(false)
     const [total, setTotal] = useState([])
     const [edit, setEdit] = useState(false)
+    const [bsearch, setBsearch] = useState(false)
 
     const filtered = (all) => {
         return all.nama.toUpperCase().indexOf(search.toUpperCase()) > -1
@@ -136,18 +137,35 @@ const Home = () => {
     const [search, setSearch] = useState('')
     return (
         <View style={styles.container}>
-            <Input
-                containerStyle={{backgroundColor:'#fff9', marginVertical:10, height:60, borderRadius:5,borderWidth:1, borderColor:'orange'}}
-                rightIcon={<Icon name="closecircleo" type="antdesign" onPress={()=>setSearch('')}/>}
-                placeholder="Search.."
-                value={search}
-                onChangeText={(e)=>{
-                setSearch(e)
-            }}/>
-
-            {vtotal && JSON.parse(total).map((item,i)=>(
-                <Text h4 style={{marginHorizontal:10}} key={i}>Total Rp {item.total}</Text>
-            ))}
+            <View style={{flexDirection:'row', justifyContent:'space-between',paddingVertical:10}}>
+                {vtotal && JSON.parse(total).map((item,i)=>(
+                    <Text h4 key={i}>{item.total > 0 ? 'Total Rp' : 'Belum ada data'} {item.total}</Text>
+                ))}
+                <Button
+                    onPress={()=>{
+                        setBsearch(!bsearch)
+                        setSearch('')
+                    }}
+                    type="clear" 
+                    icon={bsearch ? <Icon type="antdesign" name="close" /> : <Icon type="antdesign" name="search1"/>}
+                />
+            </View>
+            {bsearch && 
+                <Input
+                    containerStyle={{
+                        backgroundColor:'#fff9',
+                        height:60,
+                        borderRadius:5,borderWidth:1,
+                        borderColor:'orange',
+                    }}
+                    rightIcon={<Icon name="closecircleo" type="antdesign" onPress={()=>setSearch('')}/>}
+                    placeholder="Search.."
+                    value={search}
+                    underlineColorAndroid='#fff9'
+                    onChangeText={(e)=>{
+                    setSearch(e)
+                }}/> 
+            }
 
             <Overlay
                 isVisible={open}
@@ -171,7 +189,8 @@ const Home = () => {
                 }}/>
             </Overlay>
             {/* EDIT */}
-            <Overlay isVisible={edit} onBackdropPress={()=>{
+            <Overlay isVisible={edit}
+                onBackdropPress={()=>{
                 setEdit(false);
                 clearForm();
             }}>
@@ -195,7 +214,7 @@ const Home = () => {
             <ScrollView>
                 {load && JSON.parse(barang).filter(filtered).map((item,i)=>(
                     <ListItem key={i}
-                        containerStyle={{borderRadius:5,marginVertical:5,borderWidth:1, borderColor:'orange'}}>
+                        containerStyle={{borderRadius:5,marginVertical:5,borderWidth:1, borderColor:'orange',backgroundColor:'#fff9'}}>
                         <Text>{i+1}</Text>
                         <ListItem.Content>
                             <ListItem.Title>{item.nama}</ListItem.Title>
@@ -225,11 +244,11 @@ const Home = () => {
             }}>
                 <Text h4 style={{width:300,marginBottom:10,textAlign:'center'}}>Sudah ambil?</Text>
                 <View style={{flexDirection:'row', justifyContent:'space-around'}}>
-                    <Button type="clear" title="YES" onPress={()=>{
+                    <Button type="clear" title="Sudah" onPress={()=>{
                         ambilBarang();
                         jumlah();
                     }}/>
-                    <Button type="clear" title="NO" onPress={()=>{
+                    <Button type="clear" title="Belum" onPress={()=>{
                         setSudah(false)
                         setId(0)
                     }}/>

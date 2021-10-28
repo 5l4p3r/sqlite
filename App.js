@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar'
 import React from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { KeyboardAvoidingView, StyleSheet, Text, View } from 'react-native'
 import { Link, NativeRouter, Route } from 'react-router-native'
 import { UseContext } from './hooks/UseContext'
 import Cart from './pages/Cart'
@@ -64,6 +64,7 @@ const styles = StyleSheet.create({
     flex:1,
     paddingTop:25,
     backgroundColor:'#c3ebd9',
+    color: '#000000'
   },
   nav: {
     flexDirection:'row',
@@ -71,7 +72,6 @@ const styles = StyleSheet.create({
     backgroundColor:'orange',
     height: 50,
     alignItems:'center',
-    position:'relative',
   },
   navItem: {
     backgroundColor: 'orange',
