@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, View} from 'react-native'
-import { Button, Icon, Input, ListItem, Overlay, Text} from 'react-native-elements'
+import { Button, FAB, Icon, Input, ListItem, Overlay, Text} from 'react-native-elements'
 import { UseContext } from '../hooks/UseContext'
 
 const Home = () => {
@@ -149,23 +149,15 @@ const Home = () => {
                 <Text h4 style={{marginHorizontal:10}} key={i}>Total Rp {item.total}</Text>
             ))}
 
-            <Button
-            type="solid"
-            buttonStyle={{borderRadius:5,marginBottom:10, backgroundColor:'orange'}}
-            onPress={()=>setOpen(true)}
-            icon={
-                <Icon name="shoppingcart" type="antdesign" color="#fff" size={20}/>
-            }/>
-
-            {/* ADD */}
-            <Overlay isVisible={open}
-            onBackdropPress={()=>{
+            <Overlay
+                isVisible={open}
+                onBackdropPress={()=>{
                 setOpen(false)
-            }}>
+                }}>
                 <Text h4>Create Cart</Text>
                 <Text>Nama</Text>
                 <Input placeholder="Name" 
-                    containerStyle={{ width:300 }} 
+                    containerStyle={{ width:350 }} 
                     onChangeText={(e)=>setNama(e)}/>
                 <Text>Harga</Text>
                 <Input keyboardType='numeric'
@@ -187,7 +179,7 @@ const Home = () => {
                 <Text>Nama</Text>
                 <Input placeholder="Name"
                     value={nama}
-                    containerStyle={{ width:300 }} 
+                    containerStyle={{ width:350 }} 
                     onChangeText={(e)=>setNama(e)}/>
                 <Text>Harga</Text>
                 <Input keyboardType='numeric'
@@ -222,11 +214,12 @@ const Home = () => {
                                 setHarga(item.harga);
                                 setId(item.id);
                             }}
-                            icon={<Icon type="FontAwesome" name="edit"/>}/>
+                            icon={<Icon type="Feather" name="edit"/>}/>
                     </ListItem>
                 ))}
             </ScrollView>
-            <Overlay isVisible={sudah} onBackdropPress={()=>{
+            <Overlay
+                isVisible={sudah} onBackdropPress={()=>{
                 setSudah(false)
                 setId(0)
             }}>
@@ -242,6 +235,10 @@ const Home = () => {
                     }}/>
                 </View>
             </Overlay>
+            <FAB icon={<Icon type="antdesign" color="black" name="shoppingcart"/>} 
+                color="orange"
+                onPress={()=>setOpen(true)}
+                style={styles.fab}/>
         </View>
     )
 }
@@ -255,5 +252,11 @@ const styles = StyleSheet.create({
     },
     add: {
         padding: 5,
+    },
+    fab: {
+        backgroundColor:'orange',
+        position:'absolute',
+        bottom:10,
+        right:10
     }
 })

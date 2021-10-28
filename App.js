@@ -45,10 +45,10 @@ const App = () => {
           <Route path="/cart" component={Cart}/>
           <View style={styles.nav}>
             <Link to="/" style={styles.navItem}>
-              <Icon name="home" type="antdesign" size={36}/>
+              <Icon name="home" type="antdesign" color="white" size={36}/>
             </Link>
             <Link to="/cart" style={styles.navItem}>
-              <Icon name="shoppingcart" type="antdesign" size={36}/>
+              <Icon name="shoppingcart" type="antdesign" color="white" size={36}/>
             </Link>
           </View>
         </View>
