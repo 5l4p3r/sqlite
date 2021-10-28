@@ -1,5 +1,7 @@
-# sqlite
-npm install
+# sqlite in React Native
 
 
-expo start
+#npm install
+
+
+#expo start
