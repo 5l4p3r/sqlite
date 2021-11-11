@@ -15,7 +15,7 @@ const Cart = () => {
     const getData = async() => {
         db.transaction(txn => {
             txn.executeSql(
-                `SELECT * FROM barang WHERE ambil = 1 ORDER BY nama`,
+                `SELECT id, nama, jumlah, harga, (jumlah * harga) AS subtotal FROM barang WHERE ambil = 1 ORDER BY nama ASC`,
                 [],
                 async(req,res) => {
                     if(res.rows.length > 0){
@@ -38,7 +38,7 @@ const Cart = () => {
                 `DELETE FROM barang WHERE id = ?`,
                 [id],
                 (req,res)=>{
-                    console.log('Berhasil Dihapus' + res);
+                    // console.log('Berhasil Dihapus' + res);
                     setId(0)
                     setDel(false)
                 },
@@ -52,7 +52,7 @@ const Cart = () => {
     const jumlah = async() => {
         db.transaction(tx=>{
             tx.executeSql(
-                `SELECT (SUM(harga)) AS total FROM barang WHERE ambil = 1`,
+                `SELECT (SUM(harga * jumlah)) AS total FROM barang WHERE ambil = 1`,
                 [],
                 async(req, res)=> {
                     if(res.rows.length > 0){
@@ -91,7 +91,11 @@ const Cart = () => {
                         <Text>{i+1}</Text>
                         <ListItem.Content>
                             <ListItem.Title>{item.nama}</ListItem.Title>
-                            <ListItem.Subtitle>Rp {item.harga}</ListItem.Subtitle>
+                            <ListItem.Subtitle>Price Rp {item.harga}</ListItem.Subtitle>
+                        </ListItem.Content>
+                        <ListItem.Content>
+                            <ListItem.Subtitle>QTY {item.jumlah} pc</ListItem.Subtitle>
+                            <ListItem.Subtitle>Sub Rp {item.subtotal}</ListItem.Subtitle>
                         </ListItem.Content>
                         <Button type="clear"
                             icon={<Icon name="delete" color="red" type="antdesign"/>}

@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar'
 import React from 'react'
-import { KeyboardAvoidingView, StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import { Link, NativeRouter, Route } from 'react-router-native'
 import { UseContext } from './hooks/UseContext'
 import Cart from './pages/Cart'
@@ -18,6 +18,7 @@ const App = () => {
         `CREATE TABLE IF NOT EXISTS barang (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           nama VARCHAR(45),
+          jumlah INTEGER(11),
           harga INTEGER(11),
           ambil INTEGER(1) DEFAULT(0))`,
         [],
@@ -62,7 +63,7 @@ export default App
 const styles = StyleSheet.create({
   container:{
     flex:1,
-    paddingTop:25,
+    paddingTop:40,
     backgroundColor:'#c3ebd9',
     color: '#000000'
   },

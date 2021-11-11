@@ -7,6 +7,7 @@ const Home = () => {
     const {db} = useContext(UseContext)
     const [barang, setBarang] = useState([])
     const [nama,setNama] = useState('')
+    const [jumlah, setJumlah] = useState(0)
     const [harga, setHarga] = useState(0)
     const [id, setId] = useState(0)
     const [sudah, setSudah] = useState(false)
@@ -24,6 +25,7 @@ const Home = () => {
         setId(0);
         setNama('');
         setHarga('');
+        setJumlah(0);
     }
 
     const createCart = () => {
@@ -32,8 +34,8 @@ const Home = () => {
         }else{
             db.transaction(txn => {
                 txn.executeSql(
-                    `INSERT INTO barang (id,nama,harga,ambil) VALUES (?,?,?,?)`,
-                    [null,nama,harga,0],
+                    `INSERT INTO barang (id,nama,jumlah,harga,ambil) VALUES (?,?,?,?,?)`,
+                    [null,nama,jumlah,harga,0],
                     (txn,res)=>{
                         setNama('')
                         setHarga(0)
@@ -53,14 +55,14 @@ const Home = () => {
         }else{
             db.transaction(tx=>{
                 tx.executeSql(
-                    `UPDATE barang SET nama = ?, harga = ? WHERE id = ?`,
-                    [nama,harga,id],
+                    `UPDATE barang SET nama = ?, jumlah = ?, harga = ? WHERE id = ?`,
+                    [nama,jumlah,harga,id],
                     (res) => {
                         console.log('Berhasil Update ' + res);
                         setEdit(false);
                         clearForm();
                         getData();
-                        jumlah();
+                        belumAmbil();
                     },
                     error => {
                         console.log('Gagal Update karena ' + error.message);
@@ -73,7 +75,7 @@ const Home = () => {
     const getData = async() => {
         db.transaction(txn => {
             txn.executeSql(
-                `SELECT * FROM barang WHERE ambil = 0 ORDER BY nama`,
+                `SELECT id, nama, jumlah, harga, (jumlah * harga) AS subtotal FROM barang WHERE ambil = 0 ORDER BY nama`,
                 [],
                 async(req,res) => {
                     if(res.rows.length > 0){
@@ -96,7 +98,7 @@ const Home = () => {
                 `UPDATE barang SET ambil = ? WHERE id = ? `,
                 [1, id],
                 (res)=>{
-                    console.log('Berhasil '+ res);
+                    // console.log('Berhasil '+ res);
                     setId(0)
                     setSudah(false)
                     getData()
@@ -108,10 +110,10 @@ const Home = () => {
         })
     }
 
-    const jumlah = async() => {
+    const belumAmbil = async() => {
         db.transaction(tx=>{
             tx.executeSql(
-                `SELECT (SUM(harga)) AS total FROM barang WHERE ambil = 0`,
+                `SELECT (SUM(jumlah * harga)) AS total FROM barang WHERE ambil = 0`,
                 [],
                 async(req, res)=> {
                     if(res.rows.length > 0){
@@ -130,7 +132,7 @@ const Home = () => {
 
     useEffect(()=>{
         getData();
-        jumlah();
+        belumAmbil();
     },[])
 
     const [open,setOpen] = useState(false)
@@ -177,6 +179,12 @@ const Home = () => {
                 <Input placeholder="Name" 
                     containerStyle={{ width:350 }} 
                     onChangeText={(e)=>setNama(e)}/>
+                <Text>Jumlah</Text>
+                <Input keyboardType='numeric'
+                    placeholder="QTY"
+                    containerStyle={{ width:300 }}
+                    onChangeText={(e)=>setJumlah(e)}
+                />
                 <Text>Harga</Text>
                 <Input keyboardType='numeric'
                     placeholder="Estimate Price" 
@@ -185,7 +193,7 @@ const Home = () => {
                 <Button type="solid" buttonStyle={{backgroundColor:'orange'}} icon={<Icon name="addfile" type="antdesign" color="#fff"/>} onPress={()=>{
                     createCart();
                     getData();
-                    jumlah();
+                    belumAmbil();
                 }}/>
             </Overlay>
             {/* EDIT */}
@@ -200,6 +208,13 @@ const Home = () => {
                     value={nama}
                     containerStyle={{ width:350 }} 
                     onChangeText={(e)=>setNama(e)}/>
+                <Text>Jumlah</Text>
+                <Input keyboardType='numeric'
+                    value={jumlah.toString()}
+                    placeholder="QTY"
+                    containerStyle={{ width:300 }}
+                    onChangeText={(e)=>setJumlah(e)}
+                />
                 <Text>Harga</Text>
                 <Input keyboardType='numeric'
                     value={harga.toString()}
@@ -218,7 +233,11 @@ const Home = () => {
                         <Text>{i+1}</Text>
                         <ListItem.Content>
                             <ListItem.Title>{item.nama}</ListItem.Title>
-                            <ListItem.Subtitle>Rp {item.harga}</ListItem.Subtitle>
+                            <ListItem.Subtitle>Price Rp {item.harga}</ListItem.Subtitle>
+                        </ListItem.Content>
+                        <ListItem.Content>
+                            <ListItem.Subtitle>QTY {item.jumlah} pc</ListItem.Subtitle>
+                            <ListItem.Subtitle>Sub Rp {item.subtotal}</ListItem.Subtitle>
                         </ListItem.Content>
                         <Button type="clear"
                             icon={<Icon name="shoppingcart" type="antdesign"/>}
@@ -230,12 +249,14 @@ const Home = () => {
                             onPress={()=>{
                                 setEdit(true);
                                 setNama(item.nama);
+                                setJumlah(item.jumlah);
                                 setHarga(item.harga);
                                 setId(item.id);
                             }}
                             icon={<Icon type="Feather" name="edit"/>}/>
                     </ListItem>
                 ))}
+                <View style={{height:68}}/>
             </ScrollView>
             <Overlay
                 isVisible={sudah} onBackdropPress={()=>{
@@ -246,7 +267,7 @@ const Home = () => {
                 <View style={{flexDirection:'row', justifyContent:'space-around'}}>
                     <Button type="clear" title="Sudah" onPress={()=>{
                         ambilBarang();
-                        jumlah();
+                        belumAmbil();
                     }}/>
                     <Button type="clear" title="Belum" onPress={()=>{
                         setSudah(false)
