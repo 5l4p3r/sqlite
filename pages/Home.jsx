@@ -229,7 +229,15 @@ const Home = () => {
             <ScrollView>
                 {load && JSON.parse(barang).filter(filtered).map((item,i)=>(
                     <ListItem key={i}
-                        containerStyle={{borderRadius:5,marginVertical:5,borderWidth:1, borderColor:'orange',backgroundColor:'#fff9'}}>
+                        containerStyle={{borderRadius:5,marginVertical:5,borderWidth:1, borderColor:'orange',backgroundColor:'#fff9'}}
+                        onLongPress={()=>{
+                            setEdit(true);
+                            setNama(item.nama);
+                            setJumlah(item.jumlah);
+                            setHarga(item.harga);
+                            setId(item.id);
+                        }}
+                        >
                         <Text>{i+1}</Text>
                         <ListItem.Content>
                             <ListItem.Title>{item.nama}</ListItem.Title>
@@ -245,7 +253,7 @@ const Home = () => {
                                 setSudah(true);
                                 setId(item.id);
                             }}/>
-                        <Button type="clear"
+                        {/* <Button type="clear"
                             onPress={()=>{
                                 setEdit(true);
                                 setNama(item.nama);
@@ -253,7 +261,7 @@ const Home = () => {
                                 setHarga(item.harga);
                                 setId(item.id);
                             }}
-                            icon={<Icon type="Feather" name="edit"/>}/>
+                            icon={<Icon type="Feather" name="edit"/>}/> */}
                     </ListItem>
                 ))}
                 <View style={{height:68}}/>

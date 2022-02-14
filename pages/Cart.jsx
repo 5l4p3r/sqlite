@@ -11,6 +11,7 @@ const Cart = () => {
     const [total, setTotal] = useState([])
     const [del, setDel] = useState(false)
     const [id, setId] = useState(0)
+    const [reset, setReset] = useState(false)
 
     const getData = async() => {
         db.transaction(txn => {
@@ -49,6 +50,20 @@ const Cart = () => {
         })
     }
 
+    const ResetToList = () => {
+        db.transaction(tx=>{
+            tx.executeSql(
+                `UPDATE barang SET ambil = ?`,
+                [0],
+                (res)=>{
+                    setReset(false)
+                    getData();
+                    jumlah();
+                }
+            )
+        })
+    }
+
     const jumlah = async() => {
         db.transaction(tx=>{
             tx.executeSql(
@@ -75,9 +90,18 @@ const Cart = () => {
     },[])
     return (
         <View style={styles.container}>
-            {vtotal && JSON.parse(total).map((item,i)=>(
-                <Text h4 style={{marginHorizontal:10,marginVertical:10}} key={i}>{item.total > 0 ? 'Total Rp' : 'Belum ambil apapun'} {item.total}</Text>
-            ))}
+            <View style={{flexDirection:'row', justifyContent:'space-between',paddingVertical:10}}>
+                {vtotal && JSON.parse(total).map((item,i)=>(
+                    <Text h4 style={{marginHorizontal:10,marginVertical:10}} key={i}>{item.total > 0 ? 'Total Rp' : 'Belum ambil apapun'} {item.total}</Text>
+                ))}
+                <Button
+                    onPress={()=>{
+                        setReset(true)
+                    }}
+                    type="clear" 
+                    icon={<Icon type="antdesign" name="back"/>}
+                />
+            </View>
 
             <ScrollView>
                 {load && JSON.parse(barang).map((item,i)=>(
@@ -120,6 +144,19 @@ const Cart = () => {
                     }}/>
                     <Button title="No" type="clear" onPress={()=>setDel(false)}/>
                 </View>
+            </Overlay>
+
+            <Overlay isVisible={reset} onBackdropPress={()=>{
+                    setReset(false)
+                }}>
+                    <Text h4 style={{width:300,marginBottom:10,textAlign:'center'}}>Reset ke List Belanja?</Text>
+                    <Button type="clear" title="Iya" onPress={()=>{
+                        ResetToList()
+                    }}/>
+                    <Button type="clear" title="Tidak" onPress={()=>{
+                        setReset(false)
+                        setId(0)
+                    }}/>
             </Overlay>
         </View>
     )
